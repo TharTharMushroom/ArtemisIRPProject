@@ -1,0 +1,22 @@
+/* Ensure the body fills the entire screen */
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center;     /* Centers vertically */
+  min-height: 100vh;       /* 100% of the viewport height */
+  background-color: #1a1a1a; /* Optional: dark background */
+  flex-direction: column;  /* Keeps the H1 above the game */
+}
+
+#main-game {
+  /* This ensures the div wraps tightly around the canvas */
+  display: flex;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* Optional: adds depth */
+}
+
+h1 {
+  font-family: sans-serif;
+  color: white;
+  margin-bottom: 20px;
+}
