@@ -5,11 +5,35 @@ let playerImg;
 let flameImg;
 let harvesterImg;
 let shockImg;
+let surfaceImg;
 
 let harvesters = [];
 let currentBossIndex = 0;
 
 let gameState = "fight"; // "fight", "win", "lose"
+
+let profileImg;
+
+let message = "";
+let messageTimer = 0;
+
+let stars = [];
+let starCount = 100; 
+
+let messages = [
+  "Don't make this hard, we'll make you pay for it!",
+  "Did you see that?",
+  "Whoever you are, we know you're out there!"
+];
+
+function preload() {
+  playerImg = loadImage('art/astronaut.png');
+  flameImg = loadImage('art/flame.png');
+  harvesterImg = loadImage('art/harvester.png');
+  shockImg = loadImage('art/shock.png');
+  profileImg = loadImage('art/profile.png');
+  surfaceImg = loadImage('art/moonsurface.png');
+}
 
 function setup() {
   let canvas = createCanvas(750, 550);
@@ -19,14 +43,15 @@ function setup() {
   for (let i = 0; i < 4; i++) {
   harvesters.push(new Harvester(i)); // pass difficulty index
 }
+generateStars(starCount);
 }
 
 function draw() {
-  background(40);
+  background(15);
+  drawStars();
 
   // Draw the floor
-  fill(80);
-  rect(0, height - floorHeight, width, floorHeight);
+  image(surfaceImg,0, height - floorHeight, width, floorHeight);
 
   player.update();
   player.show();
@@ -45,6 +70,9 @@ function draw() {
     boss.show();
   } else if (boss && !boss.active) {
     currentBossIndex++;
+    // trigger message
+  message = messages[currentBossIndex % messages.length];
+  messageTimer = 180;
     if (currentBossIndex >= harvesters.length) {
       gameState = "win";
     }
@@ -56,31 +84,16 @@ function draw() {
 } else {
   drawEndScreen();
 }
+drawMessage();
 }
 
-function preload() {
-  playerImg = loadImage('art/astronaut.png');
-  flameImg = loadImage('art/flame.png');
-  harvesterImg = loadImage('art/harvester.png');
-  shockImg = loadImage('art/shock.png');
-}
+
 
 function keyPressed() {
   // Space to Jump
   if (key === 'w' || key === 'W' || keyCode === UP_ARROW) {
     player.jump();
   }
-
-  // 'F' or Enter to Shoot
-  /*if (key === ' ' || keyCode === ENTER) {
-    let p = new Projectile(
-      player.x + player.w / 2, 
-      player.y + player.h / 2, 
-      player.facing, 
-      200 // Max distance of 200 pixels
-    );
-    projectiles.push(p);
-  }*/
 }
 
 function drawEndScreen() {
@@ -422,11 +435,15 @@ if (this.attackTimer < 30 && this.state === "idle" && this.level > 0) {
 
 class Shock {
   constructor(x, y, dir, speed) {
+    this.size = 64;
     this.x = x;
-    this.y = y;
+    this.y = height-80-this.size+40;
     this.dir = dir;
     this.speed = speed;
     this.active = true;
+
+    // 🔥 SIZE CONTROL (2x bigger than before)
+     // was effectively 32 → now doubled
   }
 
   update() {
@@ -451,10 +468,68 @@ class Shock {
 
   show() {
     push();
+
     translate(this.x, this.y);
     scale(this.dir, 1);
+
     imageMode(CENTER);
-    image(shockImg, 0, 0, 32, 32);
+
+    // 🔥 doubled visual size
+    image(shockImg, 0, 0, this.size, this.size);
+
     pop();
+  }
+}
+
+function drawMessage() {
+  if (messageTimer > 0) {
+    messageTimer--;
+
+    push(); // 🔥 isolate drawing state
+
+    // Background bar
+    fill(0, 0, 0, 180);
+    rect(150, 10, width - 160, 50);
+
+    // Text
+    fill(255);
+    textSize(18);
+    textAlign(LEFT, CENTER);
+    text(message, 170, 35);
+
+    // Profile image (top right)
+    imageMode(CENTER);
+    image(profileImg, width - 40, 30, 32, 32);
+
+    pop(); // 🔥 restore previous state
+  }
+}
+
+function generateStars(count) {
+  stars = [];
+
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: random(width),
+      y: random(height - floorHeight), // keep above ground
+      size: random([2, 3, 4]), // pixel sizes
+      twinkleOffset: random(1000)
+    });
+  }
+}
+
+function drawStars() {
+  noStroke();
+
+  for (let s of stars) {
+    // subtle twinkle effect
+    let brightness = map(
+      sin(frameCount * 0.05 + s.twinkleOffset),
+      -1, 1,
+      150, 255
+    );
+
+    fill(brightness);
+    rect(s.x, s.y, s.size, s.size);
   }
 }
