@@ -10,7 +10,7 @@ let surfaceImg;
 let harvesters = [];
 let currentBossIndex = 0;
 
-let gameState = "fight"; // "fight", "win", "lose"
+let gameState = "menu"; // "fight", "win", "lose"
 
 let profileImg;
 
@@ -49,6 +49,11 @@ generateStars(starCount);
 function draw() {
   background(15);
   drawStars();
+
+if (gameState === "menu") {
+    drawMenu();
+    return;
+  }
 
   // Draw the floor
   image(surfaceImg,0, height - floorHeight, width, floorHeight);
@@ -101,16 +106,33 @@ function drawEndScreen() {
 
   fill(255);
   textAlign(CENTER, CENTER);
-  textSize(50);
-text(gameState === "win" ? "YOU WIN" : "YOU LOSE", width / 2, height / 2);
 
-// Button
-fill(100);
-rect(width / 2 - 75, height / 2 + 40, 150, 50);
+  textSize(40);
+  text(gameState === "win" ? "YOU WIN" : "YOU LOSE", width / 2, height / 2 - 60);
 
-fill(255);
-textSize(20);
-text("REPLAY", width / 2, height / 2 + 65);
+  textSize(16);
+
+  if (gameState === "win") {
+    text(
+      "You destroyed all four harvesters, crippling the Sanchez Aluminum\nand allowing Trond to buy the company.\nReward: 1,000,000 slugs",
+      width / 2,
+      height / 2
+    );
+  } else {
+    text(
+      "The harvester hits you and rips open your spacesuit,\ncausing a fatal leak.",
+      width / 2,
+      height / 2
+    );
+  }
+
+  // Replay button
+  fill(100);
+  rect(width / 2 - 75, height / 2 + 80, 150, 50);
+
+  fill(255);
+  textSize(20);
+  text("REPLAY", width / 2, height / 2 + 105);
 }
 
 function restartGame() {
@@ -127,15 +149,29 @@ function restartGame() {
 }
 
 function mousePressed() {
-  if (gameState !== "fight") {
-    // check button click
+  // --- MENU BUTTON ---
+  if (gameState === "menu") {
     if (
       mouseX > width / 2 - 75 &&
       mouseX < width / 2 + 75 &&
-      mouseY > height / 2 + 40 &&
-      mouseY < height / 2 + 90
+      mouseY > height / 2 + 60 &&
+      mouseY < height / 2 + 110
     ) {
       restartGame();
+      gameState = "fight";
+    }
+  }
+
+  // --- REPLAY BUTTON ---
+  else if (gameState !== "fight") {
+    if (
+      mouseX > width / 2 - 75 &&
+      mouseX < width / 2 + 75 &&
+      mouseY > height / 2 + 80 &&
+      mouseY < height / 2 + 130
+    ) {
+      restartGame();
+      gameState = "fight";
     }
   }
 }
@@ -482,6 +518,9 @@ class Shock {
 }
 
 function drawMessage() {
+  if(gameState!="fight"){
+    messageTimer=0;
+  }
   if (messageTimer > 0) {
     messageTimer--;
 
@@ -532,4 +571,29 @@ function drawStars() {
     fill(brightness);
     rect(s.x, s.y, s.size, s.size);
   }
+}
+
+function drawMenu() {
+  background(10);
+
+  fill(255);
+  textAlign(CENTER, CENTER);
+
+  textSize(50);
+  text("HARVESTER HUNT", width / 2, height / 2 - 60);
+
+  textSize(18);
+  text(
+    "You were recruited by Trond Landvik to destroy four harvesters.\nReward: 1,000,000 slugs",
+    width / 2,
+    height / 2
+  );
+
+  // Play button
+  fill(100);
+  rect(width / 2 - 75, height / 2 + 60, 150, 50);
+
+  fill(255);
+  textSize(20);
+  text("PLAY", width / 2, height / 2 + 85);
 }
